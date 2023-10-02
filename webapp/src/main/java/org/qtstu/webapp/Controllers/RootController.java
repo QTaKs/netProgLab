@@ -9,6 +9,9 @@ public class RootController {
     public String index() {
         return  """
                 <p>Where is nothing to see. See:</p>
+                <p>user/  -   list of all users</p>
+                <p>user/{id}/videos    -   list videos of user</p>
+                <p>user/{id}/videos/{id}    -   print info about of video</p>
                 """;
     }
 
