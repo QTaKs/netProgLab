@@ -9,37 +9,36 @@ import java.util.ArrayList;
 @RestController
 @RequestMapping("/user/{userId}/video")
 public class VideoController {
-    //TODO
-    private final ArrayList<Video> Videos = new ArrayList<Video>();
+
 
     //TODO GET
     @GetMapping
     public ArrayList<Video> get() {
-        return Videos;
+        return null;
     }
 
 
     //TODO POST
     // @PostMapping
     public ArrayList<Video> post() {
-        return Videos;
+        return null;
     }
 
     //TODO PUT
     @PutMapping
     public ArrayList<Video> put() {
-        return Videos;
+        return null;
     }
 
     //TODO DELETE
     @DeleteMapping
     public ArrayList<Video> delete() {
-        return Videos;
+        return null;
     }
 
     //TODO PATCH
     // @PatchMapping
     public ArrayList<Video> patch() {
-        return Videos;
+        return null;
     }
 }

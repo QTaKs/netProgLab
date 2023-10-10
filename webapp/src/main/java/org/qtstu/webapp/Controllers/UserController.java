@@ -1,9 +1,11 @@
 package org.qtstu.webapp.Controllers;
 
 
+import jdk.jshell.spi.ExecutionControl;
 import org.qtstu.webapp.Models.User;
 import org.qtstu.webapp.Models.Video;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.util.ArrayList;
 
@@ -11,39 +13,35 @@ import java.util.ArrayList;
 @RequestMapping("/user")
 public class UserController {
 
-    //TODO
-    private final ArrayList<User> Users = new ArrayList<User>();
-
-
     //TODO GET
     @GetMapping
     public ArrayList<User> get() {
-        return Users;
+        return null;
     }
 
 
     //TODO POST
     // @PostMapping
     public ArrayList<User> post() {
-        return Users;
+        return null;
     }
 
     //TODO PUT
     @PutMapping
     public ArrayList<User> put() {
-        return Users;
+        return null;
     }
 
     //TODO DELETE
     @DeleteMapping
     public ArrayList<User> delete() {
-        return Users;
+        return null;
     }
 
     //TODO PATCH
     // @PatchMapping
     public ArrayList<User> patch() {
-        return Users;
+        return null;
     }
 
 
