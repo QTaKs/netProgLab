@@ -3,7 +3,7 @@ package org.qtstu.webapp.Builder;
 import org.qtstu.webapp.Models.User;
 import org.qtstu.webapp.Models.Video;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.TimeZone;
 
@@ -12,7 +12,7 @@ import static org.qtstu.webapp.GlobalOptions.*;
 public class VideoBuilder {
 
     public static Video create(User user) {
-        Video video = new Video(lastVideoId,user,randomName("Video_"),randomDuration(),ZonedDateTime.now());
+        Video video = new Video(lastVideoId,user,randomName("Video_"),randomDuration(),LocalDateTime.now());
         lastVideoId++;
         return video;
     }
