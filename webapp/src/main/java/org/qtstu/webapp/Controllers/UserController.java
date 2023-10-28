@@ -2,34 +2,40 @@ package org.qtstu.webapp.Controllers;
 
 
 import jdk.jshell.spi.ExecutionControl;
+import org.qtstu.webapp.Models.DB.DBG;
 import org.qtstu.webapp.Models.User;
+import org.qtstu.webapp.Models.UserRecord;
 import org.qtstu.webapp.Models.Video;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpServerErrorException;
 
+
 import java.util.ArrayList;
+
+//POST - CREATE
+//GET - READ
+//PUT - UPDATE/REPLACE
+//PATCH - UPDATE/MODIFY
+//DELETE - CREATE
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
-
-    //TODO GET
-    @GetMapping
+    @GetMapping("/")
     public ArrayList<User> get() {
-        return null;
+        return DBG.getUsers();
     }
-
-
-    //TODO POST
-    // @PostMapping
-    public ArrayList<User> post() {
-        return null;
+    @GetMapping("/{userId}")
+    public ArrayList<User> gets(@PathVariable Long userId) {
+        return DBG.getUser(userId);
     }
-
-    //TODO PUT
+    @PostMapping
+    public Boolean post(@RequestBody ArrayList<UserRecord> users) {
+        return DBG.addUsers(users);
+    }
     @PutMapping
-    public ArrayList<User> put() {
-        return null;
+    public Boolean put(@RequestBody ArrayList<UserRecord> users) {
+        return DBG.updateUsers(users);
     }
 
     //TODO DELETE

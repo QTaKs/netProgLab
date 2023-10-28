@@ -13,7 +13,7 @@ public class VideoController {
 
     //TODO GET
     @GetMapping
-    public ArrayList<Video> get() {
+    public ArrayList<Video> get(@PathVariable Integer userId) {
         return null;
     }
 
