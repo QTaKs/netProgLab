@@ -68,5 +68,14 @@ public class DB {
             }
             return Boolean.TRUE;
         }
+        public static Boolean deleteUser(Long id) {
+            for (int i=0;i<=usersDB.size();i++){
+                if(usersDB.get(i).id.equals(id)){
+                    usersDB.remove(i);
+                    return Boolean.TRUE;
+                }
+            }
+            return Boolean.FALSE;
+        }
     }
 }

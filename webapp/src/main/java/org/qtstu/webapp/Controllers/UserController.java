@@ -15,8 +15,8 @@ import java.util.ArrayList;
 //POST - CREATE
 //GET - READ
 //PUT - UPDATE/REPLACE
-//PATCH - UPDATE/MODIFY
 //DELETE - CREATE
+//PATCH - UPDATE/MODIFY
 
 @RestController
 @RequestMapping("/user")
@@ -37,18 +37,8 @@ public class UserController {
     public Boolean put(@RequestBody ArrayList<UserRecord> users) {
         return DBG.updateUsers(users);
     }
-
-    //TODO DELETE
-    @DeleteMapping
-    public ArrayList<User> delete() {
-        return null;
+    @DeleteMapping("/{userId}")
+    public Boolean delete(@PathVariable Long userId) {
+        return DBG.deleteUser(userId);
     }
-
-    //TODO PATCH
-    // @PatchMapping
-    public ArrayList<User> patch() {
-        return null;
-    }
-
-
 }
