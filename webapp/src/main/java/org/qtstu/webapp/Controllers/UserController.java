@@ -21,13 +21,13 @@ import java.util.ArrayList;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    @GetMapping("/")
-    public ArrayList<User> get() {
-        return DBG.getUsers();
-    }
     @GetMapping("/{userId}")
-    public ArrayList<User> gets(@PathVariable Long userId) {
-        return DBG.getUser(userId);
+    public ArrayList<UserRecord> get(@PathVariable Long userId) {
+        return DBG.getUserRecord(userId);
+    }
+    @GetMapping
+    public ArrayList<UserRecord> gets() {
+        return DBG.getUserRecords();
     }
     @PostMapping
     public Boolean post(@RequestBody ArrayList<UserRecord> users) {
@@ -37,8 +37,12 @@ public class UserController {
     public Boolean put(@RequestBody ArrayList<UserRecord> users) {
         return DBG.updateUsers(users);
     }
+//    @DeleteMapping("/{userId}")
+//    public Boolean delete(@PathVariable Long userId) {
+//        return DBG.deleteUser(userId,false);
+//    }
     @DeleteMapping("/{userId}")
-    public Boolean delete(@PathVariable Long userId) {
-        return DBG.deleteUser(userId);
+    public Boolean deleteCascade(@PathVariable Long userId) {
+        return DBG.deleteUser(userId,true);
     }
 }

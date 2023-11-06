@@ -3,6 +3,7 @@ import org.qtstu.webapp.GlobalOptions;
 import org.qtstu.webapp.Models.User;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.TimeZone;
 
@@ -11,7 +12,7 @@ import static org.qtstu.webapp.GlobalOptions.*;
 public class UserBuilder{
     //Random generation
     public static User create(){
-        User user = new User(lastUserId, LocalDateTime.now(),randomName("User_"));
+        User user = new User(lastUserId, LocalDateTime.now(ZoneOffset.UTC),randomName("User_"));
         lastUserId++;
         return user;
     };

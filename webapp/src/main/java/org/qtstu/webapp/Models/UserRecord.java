@@ -1,7 +1,8 @@
 package org.qtstu.webapp.Models;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.TimeZone;
 
-public record UserRecord(Long id, Long registrationDate,String username) {
+public record UserRecord(Long id, Long registrationDate, String username, ArrayList<Long> userVideos) {
 }
