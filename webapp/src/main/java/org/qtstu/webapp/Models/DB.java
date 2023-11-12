@@ -9,44 +9,17 @@ import java.util.Objects;
 import static org.qtstu.webapp.GlobalOptions.randomInteger;
 
 public class DB {
-    private final static ArrayList<User> usersDB = new ArrayList<User>();
-    private final static ArrayList<Video> videosDB = new ArrayList<Video>();
+    private final static DBArrayLike<UserRecord> usersDB = new DBArrayLike<UserRecord>("./users.txt");
+    private final static DBArrayLike<VideoRecord> videosDB = new DBArrayLike<VideoRecord>("./videos.txt");
     private DB() {
         usersDB.addAll(UserBuilder.create(randomInteger(2, 3)));
-        for (User q : usersDB) {
+        for (UserRecord q : usersDB) {
             q.userVideos.addAll(VideoBuilder.create(randomInteger(1, 3), q));
             videosDB.addAll(q.userVideos);
         }
     }
 
     public static class DBG {
-        public static User getUser(Long id) {
-            for (User user : usersDB) {
-                if (user.id.equals(id)) {
-                    return user;
-                }
-            }
-            return null;
-        }
-        public static Video getVideo(Long id) {
-            for (Video video : videosDB) {
-                if (video.id.equals(id)) {
-                    return video;
-                }
-            }
-            return null;
-        }
-        public static ArrayList<Video> getUserVideos(Long id) {
-            ArrayList<Video> export = new ArrayList<Video>();
-            for (Video video : videosDB) {
-                if (video.userUploader.id.equals(id)) {
-                    export.add(video);
-                }
-            }
-            return export;
-        }
-
-
         private static final DB db = new DB();
         public static ArrayList<UserRecord> getUserRecords() {
             ArrayList<UserRecord> export = new ArrayList<UserRecord>();
@@ -203,7 +176,7 @@ public class DB {
             for (VideoRecord record : videos) {
                 for (int ii = 0; ii < videosDB.size(); ii++) {
                     if (record.id().equals(videosDB.get(ii).id)) {
-                        videosDB.set(ii, Packers.Packer.recordToVideo(record));
+                        videosDB.set(ii, record);
                     }
                 }
             }
@@ -212,7 +185,7 @@ public class DB {
         public static Boolean deleteVideo(Long userId, Long videoId){
             if(usersDB.size() < videosDB.size()){
                 for (int i = 0;i<usersDB.size();i++) {
-                    User current = usersDB.get(i);
+                    UserRecord current = usersDB.get(i);
                     if(current.id.equals(userId)){
                         for (int ii = 0; ii < current.userVideos.size(); ii++) {
                             if(current.userVideos.get(ii).id.equals(videoId)){
