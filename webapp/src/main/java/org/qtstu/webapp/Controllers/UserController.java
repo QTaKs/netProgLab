@@ -37,10 +37,6 @@ public class UserController {
     public Boolean put(@RequestBody ArrayList<UserRecord> users) {
         return DBG.updateUsers(users);
     }
-//    @DeleteMapping("/{userId}")
-//    public Boolean delete(@PathVariable Long userId) {
-//        return DBG.deleteUser(userId,false);
-//    }
     @DeleteMapping("/{userId}")
     public Boolean deleteCascade(@PathVariable Long userId) {
         return DBG.deleteUser(userId,true);

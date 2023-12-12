@@ -21,7 +21,7 @@ public class VideoController {
     public ArrayList<VideoRecord> gets(@PathVariable Long userId) {
         return DBG.getVideoRecords(userId);
     }
-     @PostMapping
+    @PostMapping
     public Boolean post(@RequestBody ArrayList<VideoRecord> videos, @PathVariable Long userId) {
         return DBG.addVideos(videos,userId);
     }

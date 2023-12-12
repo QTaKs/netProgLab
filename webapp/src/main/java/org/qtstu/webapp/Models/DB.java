@@ -103,17 +103,22 @@ public class DB {
         }
 
         public static Boolean deleteUser(Long id,Boolean Cascade) {
-            for (int i=0;i<=usersDB.size();i++){
-                User curUser = usersDB.get(i);
-                if(curUser.id.equals(id)){
-                    if(Cascade){
-                        for (Video vdv: curUser.userVideos) {
-                            videosDB.remove(vdv);
-                        }
-                    }
-                    usersDB.remove(i);
-                    return Boolean.TRUE;
-                }
+//            for (int i=0;i<=usersDB.size();i++){
+//                User curUser = usersDB.get(i);
+//                if(curUser.id.equals(id)){
+//                    if(Cascade){
+//                        for (Video vdv: curUser.userVideos) {
+//                            videosDB.remove(vdv);
+//                        }
+//                    }
+//                    usersDB.remove(i);
+//                    return Boolean.TRUE;
+//                }
+//            }
+
+            usersDB.removeIf(user -> user.id.equals(id));
+            if(Cascade != null && Cascade) {
+                videosDB.removeIf(video -> video.userUploader.id.equals(id));
             }
             return Boolean.FALSE;
         }
