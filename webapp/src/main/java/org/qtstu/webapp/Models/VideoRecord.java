@@ -1,7 +1,21 @@
 package org.qtstu.webapp.Models;
+import java.sql.Date;
 
-import java.time.Duration;
-import java.time.ZonedDateTime;
+public record VideoRecord(Integer id, Integer uploader, String name, Integer duration, Date uploadDate) {
 
-public record VideoRecord(Long id, Long userUploader,String name, Long duration, Long uploadDate) {
+
+//    public static Video create(User user) {
+//        Video video = new Video(lastVideoId,user,randomName("Video_"),randomDuration(), LocalDateTime.now());
+//        lastVideoId++;
+//        return video;
+//    }
+//
+//    public static ArrayList<Video> create(int count, User user) {
+//        ArrayList<Video> array = new ArrayList<Video>();
+//        for (int i = 0; i < count; i++) {
+//            array.add(create(user));
+//        }
+//        return array;
+//    }
+
 }

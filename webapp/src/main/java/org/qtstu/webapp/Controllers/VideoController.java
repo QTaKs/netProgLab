@@ -1,36 +1,42 @@
 package org.qtstu.webapp.Controllers;
 
-import org.qtstu.webapp.Models.*;
+import jakarta.servlet.http.HttpServletResponse;
+import org.qtstu.webapp.Models.DB;
+import org.qtstu.webapp.Models.VideoRecord;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import jdk.jshell.spi.ExecutionControl;
-import org.qtstu.webapp.Models.DB.DBG;
-import org.qtstu.webapp.Models.User;
-import org.qtstu.webapp.Models.Video;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpServerErrorException;
-import java.util.ArrayList;
+
+import java.io.IOException;
+import java.util.List;
+
 
 @RestController
-@RequestMapping("/user/{userId}/video")
+@RequestMapping("/api/user/{userId}/video")
 public class VideoController {
+    private DB db;
+    @Autowired
+    VideoController(DB db){
+        this.db = db;
+    }
+
     @GetMapping("/{videoId}")
-    public ArrayList<VideoRecord> get(@PathVariable Long userId, @PathVariable Long videoId) {
-        return DBG.getVideoRecord(userId,videoId);
-    }
+    public List<VideoRecord> get(@PathVariable Long userId, @PathVariable Long videoId) {return db.getVideoRecord(userId,videoId);}
     @GetMapping
-    public ArrayList<VideoRecord> gets(@PathVariable Long userId) {
-        return DBG.getVideoRecords(userId);
+    public List<VideoRecord> gets(@PathVariable Long userId) {
+        return db.getVideoRecords(userId);
     }
-     @PostMapping
-    public Boolean post(@RequestBody ArrayList<VideoRecord> videos, @PathVariable Long userId) {
-        return DBG.addVideos(videos,userId);
-    }
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public void post(@RequestBody List<VideoRecord> videos, @PathVariable Long userId) {db.addVideos(videos,userId);}
     @PutMapping
-    public Boolean put(@RequestBody ArrayList<VideoRecord> videos, @PathVariable Long userId) {
-        return DBG.updateVideos(videos,userId);
-    }
+    public void put(@RequestBody List<VideoRecord> videos, @PathVariable Long userId) {db.updateVideos(videos,userId);}
     @DeleteMapping("/{videoId}")
-    public Boolean delete(@PathVariable Long userId,@PathVariable Long videoId) {
-        return DBG.deleteVideo(userId,videoId);
+    public void delete(@PathVariable Long userId,@PathVariable Long videoId) {db.deleteVideo(userId,videoId);}
+
+    @PostMapping("/deleteTrash")
+    public void deleteTrash(@PathVariable String userId, HttpServletResponse response) throws IOException {
+        db.deleteVideoTrash();
+        response.sendRedirect("http://localhost:8080/videos");
     }
 }
