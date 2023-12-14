@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Videos</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        table{
+            border: 1px solid #eee;
+            table-layout: fixed;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        table th {
+            font-weight: bold;
+        }
+        table td{
+            text-align: center;
+        }
+        table tbody tr:nth-child(odd){
+            background: #fff;
+        }
+        table tbody tr:nth-child(even){
+            background: #F7F7F7;
+        }
+    </style>
+</head>
+<body>
+<table>
+    <form method="post" action="http://localhost:8080/api/user/0/video/deleteTrash">
+        <button type="submit">Удалить все мусорные (<30 мин) видео</button>
+    </form>
+
+    <th:block th:each="video : ${videos}">
+        <tr>
+            <td th:text="${video.id()}">...</td>
+            <td th:text="${video.uploader()}">...</td>
+            <td th:text="${video.name()}">...</td>
+            <td th:text="${video.duration()}">...</td>
+            <td th:text="${video.uploadDate()}">...</td>
+        </tr>
+    </th:block>
+</table>
+</body>
+</html>

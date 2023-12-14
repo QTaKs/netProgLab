@@ -1,212 +1,191 @@
 package org.qtstu.webapp.Models;
-import org.qtstu.webapp.Builder.UserBuilder;
-import org.qtstu.webapp.Builder.VideoBuilder;
-import org.qtstu.webapp.Packer.Packers;
-
+import org.qtstu.webapp.Exceptions.NotFoundException;
+import org.qtstu.webapp.GlobalOptions;
+import org.qtstu.webapp.Hack.ApplicationContextHolder;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Bean;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+import org.springframework.jdbc.core.DataClassRowMapper;
 import java.util.ArrayList;
-import java.util.Objects;
+import java.util.List;
 
-import static org.qtstu.webapp.GlobalOptions.randomInteger;
-
+@Repository
 public class DB {
-    private final static DBArrayLike<UserRecord> usersDB = new DBArrayLike<UserRecord>("./users.txt");
-    private final static DBArrayLike<VideoRecord> videosDB = new DBArrayLike<VideoRecord>("./videos.txt");
-    private DB() {
-        usersDB.addAll(UserBuilder.create(randomInteger(2, 3)));
-        for (UserRecord q : usersDB) {
-            q.userVideos.addAll(VideoBuilder.create(randomInteger(1, 3), q));
-            videosDB.addAll(q.userVideos);
+    private static final String GET_USER = """
+                        SELECT * FROM USER WHERE id = ?
+            """;
+    private static final String GET_USERS = """
+                        SELECT * FROM USER
+            """;
+    private static final String CREATE_USER = """
+                        INSERT INTO USER (username, registrationDate)
+                        VALUES (:username,:registrationDate)
+            """;
+    private static final String UPDATE_USER = """
+                        UPDATE USER
+                           SET username = :username,
+                               registrationDate = :registrationDate
+                         WHERE id = :id;
+            """;
+    private static final String DELETE_USER = """
+                        DELETE FROM USER
+                        WHERE id = ?
+            """;
+    private static final String GET_VIDEO = """
+                        SELECT * FROM VIDEO WHERE id = ? and uploader = ?
+            """;
+    private static final String GET_VIDEOS = """
+                        SELECT * FROM VIDEO WHERE uploader = ?
+            """;
+    private static final String GET_VIDEOSALL = """
+                        SELECT * FROM VIDEO
+            """;
+    private static final String CREATE_VIDEO = """
+                        INSERT INTO VIDEO (uploader,name,duration,uploadDate)
+                        VALUES (:uploader,:name,:duration,:uploadDate)
+            """;
+    private static final String UPDATE_VIDEO = """
+                        UPDATE VIDEO
+                           SET name = :name,
+                               duration = :duration,
+                               uploadDate = :uploadDate
+                         WHERE id = :id and uploader = :uploader;
+            """;
+    private static final String DELETE_VIDEO = """
+                        DELETE FROM VIDEO
+                        WHERE uploader = ? and id = ?
+            """;
+    private static final String DELETE_VIDEOTRASH = """
+                        DELETE FROM VIDEO
+                        WHERE duration < 30*60
+            """;
+
+    private RowMapper<UserRecord> rowMapperUser = new DataClassRowMapper<UserRecord>(UserRecord.class);
+    private RowMapper<VideoRecord> rowMapperVideo = new DataClassRowMapper<VideoRecord>(VideoRecord.class);
+    private GlobalOptions options;
+    private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    @Autowired
+    private ApplicationContextHolder holder;
+    @Autowired
+    public DB(GlobalOptions opts, JdbcTemplate template,NamedParameterJdbcTemplate ndParamJdbcTemplate) {
+        options=opts;
+        jdbcTemplate = template;
+        namedParameterJdbcTemplate = ndParamJdbcTemplate;
+    }
+    public DB(){}
+
+    private void checkBools(){
+        if(jdbcTemplate == null){
+            jdbcTemplate = ApplicationContextHolder.getContext().getBean(JdbcTemplate.class);
+        }
+        if(namedParameterJdbcTemplate == null){
+            namedParameterJdbcTemplate = ApplicationContextHolder.getContext().getBean(NamedParameterJdbcTemplate.class);
+        }
+        if(rowMapperUser == null){
+            rowMapperUser = new DataClassRowMapper<UserRecord>(UserRecord.class);
+        }
+        if(rowMapperVideo == null){
+            rowMapperVideo = new DataClassRowMapper<VideoRecord>(VideoRecord.class);
         }
     }
 
-    public static class DBG {
-        private static final DB db = new DB();
-        public static ArrayList<UserRecord> getUserRecords() {
-            ArrayList<UserRecord> export = new ArrayList<UserRecord>();
-            for (User u:usersDB) {
-                export.add(Packers.Packer.userToRecord(u));
-            }
-            return export;
+    public List<UserRecord> getUserRecords() {
+        checkBools();
+        try {
+            return jdbcTemplate.query(GET_USERS,rowMapperUser);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("No users have found", e);
         }
-        public static ArrayList<UserRecord> getUserRecord(Long id) {
-            ArrayList<UserRecord> u = new ArrayList<>();
-            for (int i=0;i<=usersDB.size();i++){
-                if(usersDB.get(i).id.equals(id)){
-                    u.add(Packers.Packer.userToRecord(usersDB.get(i)));
-                    return u;
-                }
-            }
-            return u;
+    }
+    public List<UserRecord> getUserRecord(Long id) {
+        checkBools();
+        List<UserRecord> export = new ArrayList<>();
+        try {
+            export.add(jdbcTemplate.queryForObject(GET_USER, rowMapperUser, id));
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("User with id = [" + id + "] not found", e);
         }
-        public static Boolean addUsers(ArrayList<UserRecord> users) {
-            for (UserRecord rec:users) {
-                for (User usr:usersDB) {
-                    if(rec.id().equals(usr.id)){
-                        return Boolean.FALSE;
-                    }
-                }
-            }
-            for (UserRecord rec:users) {
-                usersDB.add(Packers.Packer.recordToUser(rec));
-            }
-            return Boolean.TRUE;
-        }
-        public static Boolean updateUsers(ArrayList<UserRecord> users) {
-            boolean newEntity;
-            for (UserRecord rec:users) {
-                newEntity = Boolean.TRUE;
-                for (User usr:usersDB) {
-                    if(rec.id().equals(usr.id)){
-                        newEntity = Boolean.FALSE;
-                        break;
-                    }
-                }
-                if(newEntity){
-                    return Boolean.FALSE;
-                }
-            }
-            for (UserRecord user : users) {
-                for (int ii = 0; ii < usersDB.size(); ii++) {
-                    if (user.id().equals(usersDB.get(ii).id)) {
-                        usersDB.set(ii, Packers.Packer.recordToUser(user));
-                    }
-                }
-            }
-            return Boolean.TRUE;
-        }
+        return export;
+    }
+    public void addUsers(List<UserRecord> users) {
+        checkBools();
+        users.forEach((userRecord -> {
+            BeanPropertySqlParameterSource paramsSource = new BeanPropertySqlParameterSource(userRecord);
+            namedParameterJdbcTemplate.update(CREATE_USER, paramsSource);
+        }));
+    }
+    public void updateUsers(List<UserRecord> users) {
+        checkBools();
+        users.forEach((userRecord -> {
+            BeanPropertySqlParameterSource paramsSource = new BeanPropertySqlParameterSource(userRecord);
+            namedParameterJdbcTemplate.update(UPDATE_USER, paramsSource);
+        }));
+    }
 
-        public static Boolean deleteUser(Long id,Boolean Cascade) {
-            for (int i=0;i<=usersDB.size();i++){
-                User curUser = usersDB.get(i);
-                if(curUser.id.equals(id)){
-                    if(Cascade){
-                        for (Video vdv: curUser.userVideos) {
-                            videosDB.remove(vdv);
-                        }
-                    }
-                    usersDB.remove(i);
-                    return Boolean.TRUE;
-                }
-            }
-            return Boolean.FALSE;
+    public void deleteUser(Long id) {
+        checkBools();
+        try {
+            jdbcTemplate.update(DELETE_USER,id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("User with id = [" + id + "] not found", e);
         }
+    }
 
-        public static ArrayList<VideoRecord> getVideoRecords(Long userId){
-            ArrayList<VideoRecord> export = new ArrayList<>();
-            for (User usr:usersDB) {
-                if(Objects.equals(usr.id, userId)){
-                    for (Video vdv:usr.userVideos) {
-                        export.add(Packers.Packer.videoToRecord(vdv));
-                    }
-                }
-            }
-            return export;
+    public List<VideoRecord> getVideoRecords(Long userId){
+        checkBools();
+        try {
+            return jdbcTemplate.query(GET_VIDEOS,rowMapperVideo,userId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("User with id = [" + userId + "] not found", e);
         }
-        public static ArrayList<VideoRecord> getVideoRecord(Long userId,Long videoId){
-            ArrayList<VideoRecord> export = new ArrayList<>();
-            for (User usr:usersDB) {
-                if(Objects.equals(usr.id, userId)){
-                    for (Video vdv:usr.userVideos) {
-                        if(Objects.equals(vdv.id, videoId)){
-                            export.add(Packers.Packer.videoToRecord(vdv));
-                        }
-                    }
-                }
-            }
-            return export;
+    }
+    public List<VideoRecord> getVideoRecordsAll(){
+        checkBools();
+        return jdbcTemplate.query(GET_VIDEOSALL,rowMapperVideo);
+    }
+    public List<VideoRecord> getVideoRecord(Long userId,Long videoId){
+        checkBools();
+        try {
+            return jdbcTemplate.query(GET_VIDEO,rowMapperVideo,userId,videoId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Video with id = [" + videoId + "] for user with id = [" + userId + "] not found", e);
         }
-        public static Boolean addVideos(ArrayList<VideoRecord> videos, Long userId){
-            for(VideoRecord record:videos){
-                if(!record.userUploader().equals(userId)){
-                    return Boolean.FALSE;
-                }
-                for (Video vdv:videosDB) {
-                    if(record.id().equals(vdv.id)){
-                        return Boolean.FALSE;
-                    }
-                }
-                Boolean exists = Boolean.FALSE;
-                for (User usr:usersDB) {
-                    if (usr.id.equals(record.userUploader())){
-                        exists = Boolean.TRUE;
-                        break;
-                    }
-                }
-                if(!exists){
-                    return Boolean.FALSE;
-                }
-            }
-            for(VideoRecord record:videos){
-                Video toInsert = Packers.Packer.recordToVideo(record);
-                videosDB.add(toInsert);
-                for (User usr:usersDB) {
-                    if (usr.id.equals(record.userUploader())){
-                        usr.userVideos.add(toInsert);
-                    }
-                }
-            }
-            return Boolean.TRUE;
+    }
+    public void addVideos(List<VideoRecord> videos, Long userId){
+        checkBools();
+        videos.forEach((videoRecord -> {
+            BeanPropertySqlParameterSource paramsSource = new BeanPropertySqlParameterSource(videoRecord);
+            namedParameterJdbcTemplate.query(CREATE_VIDEO,paramsSource,rowMapperVideo);
+        }));
+    }
+    public void updateVideos(List<VideoRecord> videos, Long userId){
+        checkBools();
+        videos.forEach((videoRecord -> {
+            BeanPropertySqlParameterSource paramsSource = new BeanPropertySqlParameterSource(videoRecord);
+            namedParameterJdbcTemplate.update(UPDATE_VIDEO, paramsSource);
+        }));
+    }
+    public void deleteVideo(Long userId, Long videoId) {
+        checkBools();
+        try {
+            jdbcTemplate.update(DELETE_VIDEO,userId,videoId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Video with id = [" + videoId + "] for user with id = [" + userId + "]  not found", e);
         }
-        public static Boolean updateVideos(ArrayList<VideoRecord> videos, Long userId){
-            for(VideoRecord record:videos){
-                if(!record.userUploader().equals(userId)){
-                    return Boolean.FALSE;
-                }
-                Boolean exists = Boolean.FALSE;
-                for (Video vdv:videosDB) {
-                    if(record.id().equals(vdv.id)){
-                        exists = Boolean.TRUE;
-                        break;
-                    }
-                }
-                if(!exists){
-                    return Boolean.FALSE;
-                }
-                exists = Boolean.FALSE;
-                for (User usr:usersDB) {
-                    if (usr.id.equals(record.userUploader())){
-                        exists = Boolean.TRUE;
-                        break;
-                    }
-                }
-                if(!exists){
-                    return Boolean.FALSE;
-                }
-            }
-            for (VideoRecord record : videos) {
-                for (int ii = 0; ii < videosDB.size(); ii++) {
-                    if (record.id().equals(videosDB.get(ii).id)) {
-                        videosDB.set(ii, record);
-                    }
-                }
-            }
-            return Boolean.TRUE;
-        }
-        public static Boolean deleteVideo(Long userId, Long videoId){
-            if(usersDB.size() < videosDB.size()){
-                for (int i = 0;i<usersDB.size();i++) {
-                    UserRecord current = usersDB.get(i);
-                    if(current.id.equals(userId)){
-                        for (int ii = 0; ii < current.userVideos.size(); ii++) {
-                            if(current.userVideos.get(ii).id.equals(videoId)){
-                                videosDB.remove(current.userVideos.get(ii));
-                                current.userVideos.remove(ii);
-                                return Boolean.FALSE;
-                            }
-                        }
-                    }
-                }
-            }else{
-               for (int i = 0;i<videosDB.size();i++) {
-                    if(videosDB.get(i).id.equals(videoId)){
-                        videosDB.get(i).userUploader.userVideos.remove(videosDB.get(i));
-                        videosDB.remove(i);
-                        return Boolean.TRUE;
-                    }
-               }
-            }
-
-            return Boolean.FALSE;
-        }
+    }
+    public void deleteVideoTrash() {
+        checkBools();
+        jdbcTemplate.update(DELETE_VIDEOTRASH);
     }
 }

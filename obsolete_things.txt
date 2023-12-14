@@ -1,0 +1,16 @@
+    private void checkBools(){
+        if(jdbcTemplate == null){
+            jdbcTemplate = ApplicationContextHolder.getContext().getBean(JdbcTemplate.class);
+        }
+        if(namedParameterJdbcTemplate == null){
+            namedParameterJdbcTemplate = ApplicationContextHolder.getContext().getBean(NamedParameterJdbcTemplate.class);
+        }
+        if(rowMapperUser == null){
+            rowMapperUser = new DataClassRowMapper<UserRecord>(UserRecord.class);
+        }
+        if(rowMapperVideo == null){
+            rowMapperVideo = new DataClassRowMapper<VideoRecord>(VideoRecord.class);
+        }
+    }
+
+
