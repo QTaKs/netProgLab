@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class DB {
+public class DB extends DBI {
     private static final String GET_USER = """
                         SELECT * FROM USER WHERE id = ?
             """;
@@ -70,13 +70,28 @@ public class DB {
                         WHERE duration < 30*60
             """;
 
-    private RowMapper<UserRecord> rowMapperUser = new DataClassRowMapper<UserRecord>(UserRecord.class);
-    private RowMapper<VideoRecord> rowMapperVideo = new DataClassRowMapper<VideoRecord>(VideoRecord.class);
-    private GlobalOptions options;
-    private JdbcTemplate jdbcTemplate;
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    @Autowired
-    private ApplicationContextHolder holder;
+    protected RowMapper<UserRecord> rowMapperUser = new DataClassRowMapper<UserRecord>(UserRecord.class);
+    protected RowMapper<VideoRecord> rowMapperVideo = new DataClassRowMapper<VideoRecord>(VideoRecord.class);
+    protected GlobalOptions options;
+    protected JdbcTemplate jdbcTemplate;
+    protected NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    protected ApplicationContextHolder holder;
+    void checkBools() {
+        if (jdbcTemplate == null) {
+            jdbcTemplate = ApplicationContextHolder.getContext().getBean(JdbcTemplate.class);
+        }
+        if (namedParameterJdbcTemplate == null) {
+            namedParameterJdbcTemplate = ApplicationContextHolder.getContext().getBean(NamedParameterJdbcTemplate.class);
+        }
+        if (rowMapperUser == null) {
+            rowMapperUser = new DataClassRowMapper<UserRecord>(UserRecord.class);
+        }
+        if (rowMapperVideo == null) {
+            rowMapperVideo = new DataClassRowMapper<VideoRecord>(VideoRecord.class);
+        }
+    }
+
+
     @Autowired
     public DB(GlobalOptions opts, JdbcTemplate template,NamedParameterJdbcTemplate ndParamJdbcTemplate) {
         options=opts;
@@ -85,21 +100,7 @@ public class DB {
     }
     public DB(){}
 
-    private void checkBools(){
-        if(jdbcTemplate == null){
-            jdbcTemplate = ApplicationContextHolder.getContext().getBean(JdbcTemplate.class);
-        }
-        if(namedParameterJdbcTemplate == null){
-            namedParameterJdbcTemplate = ApplicationContextHolder.getContext().getBean(NamedParameterJdbcTemplate.class);
-        }
-        if(rowMapperUser == null){
-            rowMapperUser = new DataClassRowMapper<UserRecord>(UserRecord.class);
-        }
-        if(rowMapperVideo == null){
-            rowMapperVideo = new DataClassRowMapper<VideoRecord>(VideoRecord.class);
-        }
-    }
-
+    @Override
     public List<UserRecord> getUserRecords() {
         checkBools();
         try {
@@ -108,6 +109,7 @@ public class DB {
             throw new NotFoundException("No users have found", e);
         }
     }
+    @Override
     public List<UserRecord> getUserRecord(Long id) {
         checkBools();
         List<UserRecord> export = new ArrayList<>();
@@ -118,6 +120,7 @@ public class DB {
         }
         return export;
     }
+    @Override
     public void addUsers(List<UserRecord> users) {
         checkBools();
         users.forEach((userRecord -> {
@@ -125,6 +128,7 @@ public class DB {
             namedParameterJdbcTemplate.update(CREATE_USER, paramsSource);
         }));
     }
+    @Override
     public void updateUsers(List<UserRecord> users) {
         checkBools();
         users.forEach((userRecord -> {
@@ -133,6 +137,7 @@ public class DB {
         }));
     }
 
+    @Override
     public void deleteUser(Long id) {
         checkBools();
         try {
@@ -142,6 +147,7 @@ public class DB {
         }
     }
 
+    @Override
     public List<VideoRecord> getVideoRecords(Long userId){
         checkBools();
         try {
@@ -150,11 +156,13 @@ public class DB {
             throw new NotFoundException("User with id = [" + userId + "] not found", e);
         }
     }
+    @Override
     public List<VideoRecord> getVideoRecordsAll(){
         checkBools();
         return jdbcTemplate.query(GET_VIDEOSALL,rowMapperVideo);
     }
-    public List<VideoRecord> getVideoRecord(Long userId,Long videoId){
+    @Override
+    public List<VideoRecord> getVideoRecord(Long userId, Long videoId){
         checkBools();
         try {
             return jdbcTemplate.query(GET_VIDEO,rowMapperVideo,userId,videoId);
@@ -162,6 +170,7 @@ public class DB {
             throw new NotFoundException("Video with id = [" + videoId + "] for user with id = [" + userId + "] not found", e);
         }
     }
+    @Override
     public void addVideos(List<VideoRecord> videos, Long userId){
         checkBools();
         videos.forEach((videoRecord -> {
@@ -169,6 +178,7 @@ public class DB {
             namedParameterJdbcTemplate.query(CREATE_VIDEO,paramsSource,rowMapperVideo);
         }));
     }
+    @Override
     public void updateVideos(List<VideoRecord> videos, Long userId){
         checkBools();
         videos.forEach((videoRecord -> {
@@ -176,6 +186,7 @@ public class DB {
             namedParameterJdbcTemplate.update(UPDATE_VIDEO, paramsSource);
         }));
     }
+    @Override
     public void deleteVideo(Long userId, Long videoId) {
         checkBools();
         try {
@@ -184,6 +195,7 @@ public class DB {
             throw new NotFoundException("Video with id = [" + videoId + "] for user with id = [" + userId + "]  not found", e);
         }
     }
+    @Override
     public void deleteVideoTrash() {
         checkBools();
         jdbcTemplate.update(DELETE_VIDEOTRASH);

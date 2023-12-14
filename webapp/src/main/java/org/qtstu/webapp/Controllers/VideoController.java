@@ -1,7 +1,7 @@
 package org.qtstu.webapp.Controllers;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.qtstu.webapp.Models.DB;
+import org.qtstu.webapp.Models.DBHolder;
 import org.qtstu.webapp.Models.VideoRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,29 +14,32 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user/{userId}/video")
 public class VideoController {
-    private DB db;
+    private DBHolder db;
     @Autowired
-    VideoController(DB db){
+    VideoController(DBHolder db){
         this.db = db;
     }
 
     @GetMapping("/{videoId}")
-    public List<VideoRecord> get(@PathVariable Long userId, @PathVariable Long videoId) {return db.getVideoRecord(userId,videoId);}
+    public List<VideoRecord> get(@PathVariable Long userId, @PathVariable Long videoId) {return db.getDb().getVideoRecord(userId,videoId);}
     @GetMapping
     public List<VideoRecord> gets(@PathVariable Long userId) {
-        return db.getVideoRecords(userId);
+        return db.getDb().getVideoRecords(userId);
     }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void post(@RequestBody List<VideoRecord> videos, @PathVariable Long userId) {db.addVideos(videos,userId);}
+    public void post(@RequestBody List<VideoRecord> videos, @PathVariable Long userId) {
+        db.getDb().addVideos(videos,userId);}
     @PutMapping
-    public void put(@RequestBody List<VideoRecord> videos, @PathVariable Long userId) {db.updateVideos(videos,userId);}
+    public void put(@RequestBody List<VideoRecord> videos, @PathVariable Long userId) {
+        db.getDb().updateVideos(videos,userId);}
     @DeleteMapping("/{videoId}")
-    public void delete(@PathVariable Long userId,@PathVariable Long videoId) {db.deleteVideo(userId,videoId);}
+    public void delete(@PathVariable Long userId,@PathVariable Long videoId) {
+        db.getDb().deleteVideo(userId,videoId);}
 
     @PostMapping("/deleteTrash")
     public void deleteTrash(@PathVariable String userId, HttpServletResponse response) throws IOException {
-        db.deleteVideoTrash();
+        db.getDb().deleteVideoTrash();
         response.sendRedirect("http://localhost:8080/videos");
     }
 }

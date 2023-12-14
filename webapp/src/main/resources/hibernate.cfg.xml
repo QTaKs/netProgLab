@@ -1,0 +1,16 @@
+<hibernate-configuration>
+    <session-factory>
+<!--        com.springboot.sqlite.SQLDialect-->
+        <property name="dialect">org.hibernate.community.dialect.SQLiteDialect</property>
+        <property name="connection.driver_class">org.sqlite.JDBC</property>
+        <property name="connection.url">jdbc:sqlite:hostingDB.sqlite</property>
+        <property name="connection.username"></property>
+        <property name="connection.password"></property>
+        <property name="hibernate.show_sql ">true</property>
+        <property name="hbm2ddl.auto">update</property>
+
+        <mapping class="org.qtstu.webapp.Models.VideoRecord" />
+        <mapping class="org.qtstu.webapp.Models.UserRecord" />
+
+    </session-factory>
+</hibernate-configuration>

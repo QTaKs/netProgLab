@@ -1,21 +1,72 @@
 package org.qtstu.webapp.Models;
+import jakarta.persistence.*;
+
 import java.sql.Date;
+@Entity
+@Table(name="video", schema="main")
+public class VideoRecord {
+    @Id
+    @GeneratedValue
+    @Column(name="id", unique=true,nullable=false)
+    private Integer id;
+    @ManyToOne
+    @JoinColumn(name = "uploader", referencedColumnName = "id")
+    private UserRecord uploader;
+    @Column(name="name",nullable=false)
+    private String name;
+    @Column(name="duration",nullable=false)
+    private Integer duration;
+    @Column(name="uploadDate",nullable=false)
+    private Date uploadDate;
+    public VideoRecord(Integer id, UserRecord uploader, String name, Integer duration, Date uploadDate) {
+        this.setId(id);
+        this.setUploader(uploader);
+        this.setName(name);
+        this.setDuration(duration);
+        this.setUploadDate(uploadDate);
+    }
 
-public record VideoRecord(Integer id, Integer uploader, String name, Integer duration, Date uploadDate) {
+    public VideoRecord() {
 
+    }
 
-//    public static Video create(User user) {
-//        Video video = new Video(lastVideoId,user,randomName("Video_"),randomDuration(), LocalDateTime.now());
-//        lastVideoId++;
-//        return video;
-//    }
-//
-//    public static ArrayList<Video> create(int count, User user) {
-//        ArrayList<Video> array = new ArrayList<Video>();
-//        for (int i = 0; i < count; i++) {
-//            array.add(create(user));
-//        }
-//        return array;
-//    }
+    public Integer getId() {
+        return id;
+    }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public UserRecord getUploader() {
+        return uploader;
+    }
+
+    public void setUploader(UserRecord uploader) {
+        this.uploader = uploader;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    public Date getUploadDate() {
+        return uploadDate;
+    }
+
+    public void setUploadDate(Date uploadDate) {
+        this.uploadDate = uploadDate;
+    }
 }
