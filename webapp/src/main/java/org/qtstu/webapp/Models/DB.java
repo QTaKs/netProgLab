@@ -32,7 +32,7 @@ public class DB {
                          WHERE trade = :trade;
             """;
     private static final String DELETE = """
-                        DELETE MEMBERSHIP
+                        DELETE FROM MEMBERSHIP
                          WHERE trade = :trade;
             """;
 
